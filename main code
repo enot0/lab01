@@ -1,0 +1,42 @@
+import math
+
+s_0 = 100
+u = 1.2
+d = 0.8
+timelengthofthemodel = 2
+last_time_list =[]
+matrix = []
+reverse_matrix =[]
+# cycle that computes S_i
+for i in range(0,timelengthofthemodel+1):
+	value_of_the_stock = s_0 * (u ** (timelengthofthemodel - i)) * (d ** i)  
+	last_time_list.append(value_of_the_stock)
+
+
+#putting S_i into a list 
+updated_last_time_list=[]
+strike_price = 99
+for j in range (len(last_time_list)):
+	updated_last_time_list.append(max(last_time_list[j] - strike_price,0) )
+
+i  = 0
+p = 0.5
+ir = .06
+dt = 0.1
+
+next_list = []
+prev_list = updated_last_time_list
+length_of_lists = len(prev_list)
+
+#computing f_i and putting theese values into a triangular matrix 
+for k in range (0,timelengthofthemodel):
+	for j in range (0,length_of_lists-1):
+	 	next_list_component = math.e**(-ir*dt) * (p * prev_list[j] + (1-p) * prev_list[j+1] )
+	 	next_list.append(next_list_component)
+	reverse_matrix.append(next_list)
+	length_of_lists = length_of_lists - 1
+	prev_list = next_list
+	next_list = []	
+# printing first the last values of f_i then the very last fair price
+for i in range(0,len(reverse_matrix)):
+	print reverse_matrix[i]
