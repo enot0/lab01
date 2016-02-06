@@ -1,0 +1,78 @@
+import math
+from decimal import *
+getcontext().prec = 6
+
+# variables
+timelengthofthemodel = 50
+print 'timelengthofthemodel=',timelengthofthemodel
+# dt = timelengthofthemodel/5
+# print 'dt=timelengthofthemodel/5=',dt
+dt = float(1)/timelengthofthemodel
+print 'dt=1/timelengthofthemodel=',dt
+
+i_rate = .06
+print 'i_rate=',i_rate
+vol = .2
+print 'vol=',vol
+s_0 = 100
+print 's_0=',s_0
+strike_price = 99
+print 'strike_price=', strike_price
+
+a = math.e**(i_rate*dt)
+u = math.e**(vol*math.sqrt(dt))
+d = math.e**(-vol*math.sqrt(dt))
+print 'a=',a,'u=',u,'d=',d
+pu = a-d
+pd = u-d
+print pu
+print pd
+p = pu/pd
+print 'p=',p
+#p = (Decimal(a)-Decimal(d))/(Decimal(u)-Decimal(d))
+
+
+
+last_time_list =[]
+reverse_matrix =[]
+# cycle that computes S_i
+for i in range(0,timelengthofthemodel+1):
+	value_of_the_stock = s_0 * (u ** (timelengthofthemodel - i)) * (d ** i)  
+	last_time_list.append(value_of_the_stock)
+
+
+#putting S_i into a list 
+updated_last_time_list=[]
+
+for j in range (len(last_time_list)):
+	updated_last_time_list.append(max(last_time_list[j] - strike_price,0) )
+
+
+
+next_list = []
+prev_list = updated_last_time_list
+length_of_lists = len(prev_list)
+
+#computing f_i and putting theese values into a triangular matrix 
+for k in range (0,timelengthofthemodel):
+	for j in range (0,length_of_lists-1):
+	 	next_list_component = math.e**(-i_rate*dt) * (p * prev_list[j] + (1-p) * prev_list[j+1] )
+	 	next_list.append(next_list_component)
+	reverse_matrix.append(next_list)
+	length_of_lists = length_of_lists - 1
+	prev_list = next_list
+	next_list = []	
+	
+# printing first the last values of f_i then the very last fair price
+# for i in range(0,len(reverse_matrix)):
+# 	print reverse_matrix[i]
+print 'final fair price = ',reverse_matrix[timelengthofthemodel-1]
+#print reverse_matrix
+
+#other approach, not right
+preparatory_sum_f_0 = 0
+for i in range(0,len(updated_last_time_list)-1):
+	preparatory_f_0 = updated_last_time_list[i] * (p ** (timelengthofthemodel - i)) * ((1-p) ** i)
+	preparatory_sum_f_0 = preparatory_sum_f_0 + preparatory_f_0
+f_0 = math.e**(-i_rate*timelengthofthemodel) * preparatory_sum_f_0
+print 'final fair price,other approach,CURRENTLY WRONG, AS COMPUTES 50 NOT 2^50 = ',f_0
